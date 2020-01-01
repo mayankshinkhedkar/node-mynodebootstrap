@@ -1,6 +1,6 @@
 {
   "name": "mynodebootstrap",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Node JS core environment setup",
   "main": "/",
   "private": false,
@@ -43,12 +43,23 @@
     "@babel/preset-env": "^7.7.1",
     "nodemon": "^1.19.4"
   },
+  "files": [
+    "public",
+    "src",
+    ".babelrc",
+    ".gitignore",
+    "example.env",
+    "nodemon.json",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mayankshinkhedkar/node-mynodebootstrap.git"
   },
   "keywords": [
-    "community"
+    "Node JS",
+    "Node",
+    "JS"
   ],
   "author": "Mayank Shinkhedkar",
   "license": "ISC",

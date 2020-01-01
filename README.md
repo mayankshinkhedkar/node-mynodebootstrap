@@ -6,10 +6,10 @@ The easiest way to get started is to clone the repository:
 
 ```bash
 # Get the latest snapshot
-git clone https://github.com/mayankshinkhedkar/node-mynodebootstrap.git mynodebootstrap
+git clone https://github.com/mayankshinkhedkar/node-mynodebootstrap.git mynodebootstrap(<Project_Name>)
 
 # Change directory
-cd mynodebootstrap
+cd mynodebootstrap(<Project_Name>)
 
 # Install NPM dependencies
 npm install
