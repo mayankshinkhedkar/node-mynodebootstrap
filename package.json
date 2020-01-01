@@ -43,15 +43,6 @@
     "@babel/preset-env": "^7.7.1",
     "nodemon": "^1.19.4"
   },
-  "files": [
-    "public",
-    "src",
-    ".babelrc",
-    ".gitignore",
-    "example.env",
-    "nodemon.json",
-    "README.md"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mayankshinkhedkar/node-mynodebootstrap.git"
