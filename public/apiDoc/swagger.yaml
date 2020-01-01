@@ -1,0 +1,141 @@
+openapi: 3.0.0
+info:
+  title: Sample Node Bootstrap API
+  description: API documentation for the Node Bootstrap
+  version: 1.0.0
+  contact:
+    email: "shinkhedkar.mayank@yahoo.com"
+servers:
+  - url: /api/v1
+    description: Development Server
+tags:
+- name: "Admin"
+  description: "Admin Endpoints"
+  externalDocs:
+    description: "Find out more"
+    url: "http://swagger.io"
+- name: "User"
+  description: "Operations about user"
+  externalDocs:
+    description: "Find out more"
+    url: "http://swagger.io"
+paths:
+  /admin-name:
+    get:
+      tags:
+      - "Admin"
+      summary: "Return Admin Name"
+      description: "Returns a single Admin Name"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+        "404":
+          description: "Not found route"
+  /admin-country:
+    get:
+      tags:
+      - "Admin"
+      summary: "Return Admin Country"
+      description: "Returns a single Admin Country"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+        "404":
+          description: "Not found route"
+  /admin-add:
+    post:
+      tags:
+      - "Admin"
+      summary: "Add Admin"
+      description: "To add more admin"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddAdmin"
+      responses:
+        "200":
+          description: "successful operation"                
+        "404":
+          description: "Not found route"
+      security:
+      - ApiKeyAuth: []
+  /user-name:
+    get:
+      tags:
+      - "User"
+      summary: "Return User Name"
+      description: "Returns a single User Name"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+        "404":
+          description: "Not found route"
+  /user-country:
+    get:
+      tags:
+      - "User"
+      summary: "Return User Country"
+      description: "Returns a single User Country"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+        "404":
+          description: "Not found route"
+  /user-add:
+    post:
+      tags:
+      - "User"
+      summary: "Add User"
+      description: "To add more user"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddUser"
+      responses:
+        "200":
+          description: "successful operation"                
+        "404":
+          description: "Not found route"
+      security:
+      - ApiKeyAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:        # arbitrary name for the security scheme
+      type: apiKey
+      in: header       # can be "header", "query" or "cookie"
+      name: access_token
+  schemas:
+    AddAdmin:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    AddUser:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string

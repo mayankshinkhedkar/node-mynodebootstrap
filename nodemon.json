@@ -1,0 +1,10 @@
+{
+  "exec": "npm run dev",
+  "watch": [
+    "src/*",
+    "public/*",
+    "nodemon.json",
+    "package.json"
+  ],
+  "ext": "js, html, css, json"
+}

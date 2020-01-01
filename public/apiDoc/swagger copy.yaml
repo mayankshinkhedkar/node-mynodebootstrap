@@ -1,0 +1,80 @@
+openapi: 3.0.0
+info:
+  title: Sample Node Bootstrap API
+  description: API documentation for the Node Bootstrap
+  version: 1.0.0
+  contact:
+    email: "shinkhedkar.mayank@yahoo.com"
+servers:
+  - url: http://localhost:3500/api/v1
+    description: Development Server
+tags:
+- name: "Admin"
+  description: "Admin Endpoints"
+  externalDocs:
+    description: "Find out more"
+    url: "http://swagger.io"
+- name: "User"
+  description: "Operations about user"
+  externalDocs:
+    description: "Find out more"
+    url: "http://swagger.io"
+paths:
+  /admin-name:
+    get:
+      tags:
+      - "Admin"
+      summary: "Return Admin Name"
+      description: "Returns a single Admin Name"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+        "404":
+          description: "Not found route"
+  /admin-country:
+    get:
+      tags:
+      - "Admin"
+      summary: "Return Admin Country"
+      description: "Returns a single Admin Country"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+        "404":
+          description: "Not found route"
+  /admin-add:
+    post:
+      tags:
+      - "Admin"
+      summary: "Add Admin"
+      description: "To add more admin"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "access_token"
+        in: "header"
+        description: "Access Token to verify authentity"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "name"
+        description: "Name of the Admin"
+        required: true
+      responses:
+        "200":
+          description: "successful operation"
+        "404":
+          description: "Not found route"
+      security:
+      - api_key: []
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "access_token"
+    in: "header"

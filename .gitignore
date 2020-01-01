@@ -1,0 +1,14 @@
+# Auto generated folder by npm/yarn install
+node_modules
+
+# Auto generated lock file by npm/yarn install
+package-lock.json
+yarn.lock
+
+# Auto generated folders by npm run dev/test/prod/watch
+dev
+test
+prod
+
+# Uncomment below line before commit Node JS Boilerplate in the git
+.env

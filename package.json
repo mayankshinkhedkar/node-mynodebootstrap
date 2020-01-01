@@ -1,0 +1,59 @@
+{
+  "name": "mynodebootstrap",
+  "version": "1.0.0",
+  "description": "Node JS core environment setup",
+  "main": "/",
+  "private": false,
+  "scripts": {
+    "build:test": "babel ./src --out-dir test",
+    "build:prod": "babel ./src --out-dir dist",
+    "clean:test": "rimraf test",
+    "clean:prod": "rimraf dist",
+    "server:dev": "babel-node ./src/bin/www",
+    "server:test": "node ./test/bin/www",
+    "server:prod": "node ./dist/bin/www",
+    "dev": "SET NODE_ENV=development& npm-run-all server:dev",
+    "test": "SET NODE_ENV=test& npm-run-all clean:test build:test server:test",
+    "prod": "SET NODE_ENV=production& npm-run-all clean:prod build:prod server:prod",
+    "development": "SET NODE_ENV=development& babel-node ./src/bin/www",
+    "start": "node run prod",
+    "start:test": "node run prod",
+    "watch": "nodemon"
+  },
+  "engines": {
+    "node": ">=11.1.0",
+    "npm": ">=6.4.1"
+  },
+  "dependencies": {
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.4",
+    "debug": "^2.6.9",
+    "dotenv": "^8.2.0",
+    "express": "^4.16.1",
+    "morgan": "^1.9.1",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.0",
+    "rotating-file-stream": "^1.4.6",
+    "swagger-ui-dist": "^3.24.3"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.2",
+    "@babel/node": "^7.7.0",
+    "@babel/preset-env": "^7.7.1",
+    "nodemon": "^1.19.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mayankshinkhedkar/node-mynodebootstrap.git"
+  },
+  "keywords": [
+    "community"
+  ],
+  "author": "Mayank Shinkhedkar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mayankshinkhedkar/node-mynodebootstrap/issues"
+  },
+  "homepage": "https://github.com/mayankshinkhedkar/node-mynodebootstrap/blob/master/README.md"
+}
