@@ -3,7 +3,7 @@ import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import fs from 'fs';
-import rfs from 'rotating-file-stream';
+import { createStream } from 'rotating-file-stream';
 import SwaggerUIDist from 'swagger-ui-dist';
 import compression from 'compression';
 import RootRouterV1 from './versoins/v1/routes';
@@ -11,20 +11,60 @@ import RootRouterV1 from './versoins/v1/routes';
 const app = express();
 const router = express.Router();
 
-const pathToSwaggerUi = SwaggerUIDist.getAbsoluteFSPath()
+const pathToSwaggerUi = SwaggerUIDist.getAbsoluteFSPath();
 
-let logDirectory = path.join(__dirname, 'log')
+let logDirectory = path.join(__dirname, 'log');
+let logFile = path.join(__dirname, 'log', 'access.log');
+let loggerFormat = `
+  ------- START -------
+  date[web] => :date[web] 
+  http-version => :http-version 
+  method => :method 
+  referrer => :referrer 
+  remote-addr => :remote-addr 
+  remote-user => :remote-user 
+  req[header] => :req[header] 
+  res[header] => :res[header]
+  response-time[3] => :response-time[3] 
+  status => :status 
+  total-time[3] => :total-time[3] 
+  url => :url 
+  user-agent => :user-agent
+  ------- END -------
+`;
 
 // ensure log directory exists
 fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory)
 
+// ensure log file exists
+fs.existsSync(logFile) || fs.open(logFile, 'w', function (err, file) {
+  if (err) throw err;
+});
+
+const pad = num => (num > 9 ? "" : "0") + num;
+const generator = (time, index) => {
+  if (!time) return "file.log";
+
+  var month = time.getFullYear() + "-" + pad(time.getMonth() + 1);
+  var day = pad(time.getDate());
+  var hour = pad(time.getHours());
+  var minute = pad(time.getMinutes());
+
+  return `${month}/${month}-${day}--${hour}-${minute}--${index}-file.log`;
+};
+
 // create a rotating write stream
-let accessLogStream = rfs('access.log', {
-  interval: '1d', // rotate daily
+let accessLogStream = createStream(generator, {
+  size: "10M", // rotate every 10 MegaBytes written
+  interval: "30m", // rotate daily
+  compress: "gzip", // compress rotated files
+  history: 'record-req-res',
+  immutable: true,
+  intervalBoundary: true,
   path: logDirectory
 })
 
-app.use(logger('combined', { stream: accessLogStream }));
+app.use(logger(loggerFormat, { stream: accessLogStream }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
