@@ -70,7 +70,7 @@ let onError = (error) => {
  * Event listener for HTTP server "listening" event.
  */
 
-let onListening = () => {
+let onListening = (server) => {
   let addr = server.address();
   let bind = typeof addr === 'string'
     ? 'pipe ' + addr
@@ -87,26 +87,21 @@ if (envDot.error) {
 }
 
 /**
- * Get port from environment and store in Express.
- */
-
-let port = normalizePort(process.env.PORT || '3000');
-let hostname = normalizePort(process.env.HOSTNAME || 'localhost');
-app.set('port', port);
-app.set('hostname', hostname);
-
-/**
  * Create HTTP server.
  */
 
-let server = http.createServer(app);
+let startServer = (expressApp, port, hostname) => {
+  let server = http.createServer(expressApp);
+  
+  /**
+   * Listen on provided port, on all network interfaces.
+   */
+  
+  server.listen(port, hostname, () => {
+    console.log(`Server running at http://${hostname}:${port}/`);
+  });
+  server.on('error', onError);
+  server.on('listening', () => onListening(server));
+}
 
-/**
- * Listen on provided port, on all network interfaces.
- */
-
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-});
-server.on('error', onError);
-server.on('listening', onListening);
+new app(normalizePort, startServer)

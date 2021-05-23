@@ -12,3 +12,7 @@ prod
 
 # Uncomment below line before commit Node JS Boilerplate in the git
 .env
+
+# Under Src
+src/log
+src/console-log

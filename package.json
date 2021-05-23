@@ -1,5 +1,5 @@
 {
-  "name": "mynodebootstrap",
+  "name": "matchformatch-api",
   "version": "1.0.1",
   "description": "Node JS core environment setup",
   "main": "/",
@@ -30,22 +30,30 @@
     "debug": "^4.3.1",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "helmet": "^4.6.0",
+    "http-status": "^1.5.0",
+    "method-override": "^3.0.0",
     "morgan": "^1.10.0",
+    "mysql2": "^2.2.5",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
     "rotating-file-stream": "^2.1.5",
-    "swagger-ui-dist": "^3.49.0"
+    "sequelize": "^6.6.2",
+    "swagger-jsdoc": "^6.1.0",
+    "swagger-ui-express": "^4.1.6",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.5"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.3",
     "@babel/core": "^7.14.3",
     "@babel/node": "^7.14.2",
     "@babel/preset-env": "^7.14.2",
-    "nodemon": "^2.0.7"
+    "nodemon": "^1.19.4"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mayankshinkhedkar/node-mynodebootstrap.git"
+    "url": "git+https://github.com/mayankshinkhedkar/matchformatch-api.git"
   },
   "keywords": [
     "Node JS",
@@ -55,7 +63,7 @@
   "author": "Mayank Shinkhedkar",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/mayankshinkhedkar/node-mynodebootstrap/issues"
+    "url": "https://github.com/mayankshinkhedkar/matchformatch-api/issues"
   },
-  "homepage": "https://github.com/mayankshinkhedkar/node-mynodebootstrap/blob/master/README.md"
+  "homepage": "https://github.com/mayankshinkhedkar/matchformatch-api/blob/master/README.md"
 }

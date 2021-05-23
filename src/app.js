@@ -4,133 +4,196 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import fs from 'fs';
 import { createStream } from 'rotating-file-stream';
-import SwaggerUIDist from 'swagger-ui-dist';
+import swaggerUi from 'swagger-ui-express'
+import swaggerJSDoc from 'swagger-jsdoc'
 import compression from 'compression';
-import RootRouterV1 from './versoins/v1/routes';
+import methodOverride from 'method-override'
+import helmet from 'helmet'
+import Config from './config';
+import swaggers from './config/swagger';
+import localLogger from './localLoggerSetup';
+import routes from './versions';
+import db from './versions/models'
 
-const app = express();
-const router = express.Router();
+const PORT = Config.port || 8080
+const HOST = Config.host || "localhost"
 
-const pathToSwaggerUi = SwaggerUIDist.getAbsoluteFSPath();
+export default class app {
+  constructor(normalizePort, startServer) {
+    this.normalizePort = normalizePort
+    this.startServer = startServer
+    this.app = express()
 
-let logDirectory = path.join(__dirname, 'log');
-let logFile = path.join(__dirname, 'log', 'access.log');
-let loggerFormat = `
-  ------- START -------
-  date[web] => :date[web] 
-  http-version => :http-version 
-  method => :method 
-  referrer => :referrer 
-  remote-addr => :remote-addr 
-  remote-user => :remote-user 
-  req[header] => :req[header] 
-  res[header] => :res[header]
-  response-time[3] => :response-time[3] 
-  status => :status 
-  total-time[3] => :total-time[3] 
-  url => :url 
-  user-agent => :user-agent
-  ------- END -------
-`;
+    this.middleware()
+    this.connectDb()
+    this.routes()
+    this.start()
+  }
 
-// ensure log directory exists
-fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory)
+    /**
+     * Loads all the middleware
+     */
+     middleware() {
+      const { app } = this
 
-// ensure log file exists
-fs.existsSync(logFile) || fs.open(logFile, 'w', function (err, file) {
-  if (err) throw err;
-});
+      /**
+       * It parses incoming requests with JSON payloads and is based on body-parser.
+       */
+      app.use(express.json());
 
-const pad = num => (num > 9 ? "" : "0") + num;
-const generator = (time, index) => {
-  if (!time) return "file.log";
+      /**
+       * URL Encoded
+       * https://www.geeksforgeeks.org/express-js-express-urlencoded-function/
+       */
+       app.use(express.urlencoded({ extended: false }));
 
-  var month = time.getFullYear() + "-" + pad(time.getMonth() + 1);
-  var day = pad(time.getDate());
-  var hour = pad(time.getHours());
-  var minute = pad(time.getMinutes());
+      /**
+       * Decreases the downloadable amount of data that’s served to users
+       * Ref: https://alligator.io/nodejs/compression/
+       */
+      app.use(compression());
+  
+      /**
+       * Lets you use HTTP verbs such as PUT or DELETE in places where the client doesn't support it.
+       * Ref: https://www.npmjs.com/package/method-override
+       */
+      app.use(methodOverride());
+  
+      /**
+       * Helmet helps you secure your Express apps by setting various HTTP headers.
+       * Ref: https://www.twilio.com/blog/securing-your-express-app-html
+       */
+      app.use(helmet())
 
-  return `${month}/${month}-${day}--${hour}-${minute}--${index}-file.log`;
-};
+      /**
+       * Parse Cookie header and populate req.cookies with an object keyed by the cookie names
+       * http://expressjs.com/en/resources/middleware/cookie-parser.html
+       */
+      app.use(cookieParser());
 
-// create a rotating write stream
-let accessLogStream = createStream(generator, {
-  size: "10M", // rotate every 10 MegaBytes written
-  interval: "30m", // rotate daily
-  compress: "gzip", // compress rotated files
-  history: 'record-req-res',
-  immutable: true,
-  intervalBoundary: true,
-  path: logDirectory
-})
+      /**
+       * Public folder access
+       */
+      app.use(express.static(path.join(__dirname, '../public')));
 
-app.use(logger(loggerFormat, { stream: accessLogStream }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+      /**
+       * Logger
+       */
+      // logger dir path
+      let logDirectory = path.join(__dirname, 'log');
 
-// Index file get call
-app.use(express.static(path.join(__dirname, '../public')));
+      // logger file path
+      let logFile = path.join(__dirname, 'log', 'access.log');
 
-/**
- * URL for swagger API
- * 
- * https://github.com/scottie1984/swagger-ui-express/blob/6711c8e4200f1921e9080b9d2dff0faa04cf1417/index.js#L94
- * https://github.com/swagger-api/swagger-ui/issues/4624#issuecomment-396439809
- * 
- * Example for -> swaggerDocURL = 'http://rackerlabs.github.io/wadl2swagger/openstack/swagger/dbaas.yaml'
- */
-const swaggerDocURL = '/swagger.yaml';
+      // logger format
+      let loggerFormat = `
+      ------- START -------
+      date[web] => :date[web] 
+      http-version => :http-version 
+      method => :method 
+      referrer => :referrer 
+      remote-addr => :remote-addr 
+      remote-user => :remote-user 
+      req[header] => :req[header] 
+      res[header] => :res[header]
+      response-time[3] => :response-time[3] 
+      status => :status 
+      total-time[3] => :total-time[3] 
+      url => :url 
+      user-agent => :user-agent
+      ------- END -------
+      `;
 
-app.use('/swagger.yaml', express.static(path.join(__dirname, '../public/apiDoc/swagger.yaml')));
+      // ensure log directory exists
+      fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory)
 
-const indexContent = fs.readFileSync(`${pathToSwaggerUi}/index.html`)
-  .toString()
-  .replace("https://petstore.swagger.io/v2/swagger.json", swaggerDocURL)
+      // ensure log file exists
+      fs.existsSync(logFile) || fs.open(logFile, 'w', function (err, file) {
+      if (err) throw err;
+      });
 
-app.get("/api-doc", (req, res) => res.send(indexContent))
-app.use(express.static(pathToSwaggerUi));
+      // logger file name generator
+      const pad = num => (num > 9 ? "" : "0") + num;
+      const generator = (time, index) => {
+      if (!time) return "file.log";
 
-// https://codeburst.io/never-forget-to-compress-on-nodejs-11a19db74e60
-app.use(compression());
+      var month = time.getFullYear() + "-" + pad(time.getMonth() + 1);
+      var day = pad(time.getDate());
+      var hour = pad(time.getHours());
+      var minute = pad(time.getMinutes());
 
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "HEAD,OPTIONS,GET,POST,PUT, DELETE");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, access_token");
-  next();
-});
+      return `${month}/${month}-${day}--${hour}-${minute}--${index}-file.log`;
+      };
 
-/**
- * API Routes
- * 
- * Version: 1
- */
-router.use("/api/v1", [RootRouterV1.AdminRouter, RootRouterV1.UserRouter]);
-app.use(router);
+      // create a rotating write stream
+      let accessLogStream = createStream(generator, {
+      size: "10M", // rotate every 10 MegaBytes written
+      interval: "30m", // rotate daily
+      compress: "gzip", // compress rotated files
+      history: 'record-req-res',
+      immutable: true,
+      intervalBoundary: true,
+      path: logDirectory
+      })
 
-/**
- * Response on Error Code 500
- */
-app.use((error, req, res, next) => {
-  res.status(error.status || 500).send({
-    success: false,
-    error: error,
-    message: error.message
-  });
-});
+      app.use(logger(loggerFormat, { stream: accessLogStream }));
 
-/**
- * Response on Error code 404
- */
-app.use((req, res, next) => {
-  let error = new Error("Not Found");
-  error.status = 404;
-  res.status(error.status).send({
-    success: false,
-    error: error,
-    message: error.message
-  });
-});
+      /**
+       * Swagger for API version wise documentation
+       */
+      const swaggersData = swaggers(PORT, HOST)
 
-module.exports = app;
+      if (Object.keys(swaggersData).length) {
+        for (const property in swaggersData) {
+          const swaggerSpec = swaggerJSDoc(swaggersData[property]);
+          app.use(property, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+        }
+      }
+    }
+
+    /**
+     * Database connection
+     */
+    connectDb() {
+      const { sequelize } = db
+
+      sequelize
+        .authenticate()
+        .then(async () => {
+          localLogger.info('Connection has been established successfully.');
+          await sequelize
+            .sync()
+            .then(() => {
+              localLogger.info('Database sync successfully');
+            })
+            .catch((error) => {
+              localLogger.error('Database syncing error %s', error);
+            });
+        })
+        .catch(err => {
+          localLogger.error('Unable to connect to the database:', err);
+        });
+    }
+
+    /**
+     * Routes initialization
+     */
+    routes() {
+      const { app } = this
+
+      routes(app)
+    }
+
+  /**
+   * Start
+   */
+  start() {
+    const { app, normalizePort, startServer } = this
+    let port = normalizePort(PORT || '3000');
+    let hostname = normalizePort(HOST || 'localhost');
+    app.set('port', port);
+    app.set('hostname', hostname);
+
+    startServer(app, port, hostname);
+  }
+}
